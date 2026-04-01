@@ -8,7 +8,7 @@
 
 ## What Is This?
 
-NineByNine AI models Sudoku as a **Constraint Satisfaction Problem** and solves it using four AI strategies — from brute-force backtracking to intelligent heuristic-driven search to local search. The project compares how these techniques perform and includes an interactive web frontend.
+NineByNine AI models Sudoku as a **Constraint Satisfaction Problem** and solves it using multiple AI strategies — from brute-force backtracking to intelligent heuristic-driven search. The goal is to compare how different CSP techniques perform and demonstrate the power of smart variable/value selection.
 
 ---
 
@@ -16,35 +16,33 @@ NineByNine AI models Sudoku as a **Constraint Satisfaction Problem** and solves 
 
 | Member | Role |
 |--------|------|
-| **Salwa** | Board, constraints, generator, Backtracking, MRV + Degree + LCV |
-| **Anjali** | Domain tracking, Forward Checking + AC-3, metrics system |
-| **Ayush** | Min-Conflicts solver, strategy runner, HTML/CSS/JS frontend |
+| **Salwa** | Board representation, constraint checking, puzzle generation, Plain Backtracking solver, MRV solver |
+| **Anjali** | Domain tracking, Forward Checking solver, metrics collection system |
+| **Ayush** | Min-Conflicts local search solver, strategy runner, integration |
 
 ---
 
 ## Algorithms
 
-**Plain Backtracking** — Baseline DFS. Fills cells in row-major order, tries 1–9, backtracks on violation.
+**Plain Backtracking** — The baseline. Fills cells left-to-right, top-to-bottom, tries values 1–9, and backtracks on constraint violations. Simple but explores many unnecessary branches.
 
-**Backtracking + MRV + Degree + LCV** — Always picks the most constrained cell. Degree heuristic breaks ties. Least Constraining Value ordering tries values that leave the most options for neighbors.
+**Backtracking + MRV** — Smarter cell selection. Always picks the most constrained cell (fewest legal values remaining). Dramatically reduces the search space compared to plain backtracking.
 
-**MRV + Forward Checking + AC-3** — After each assignment, prunes that value from neighbors' domains. AC-3 arc consistency cascades further reductions. Domain wipeout triggers immediate backtracking.
+**MRV + Forward Checking** — Adds constraint propagation. After each assignment, prunes that value from all neighboring cells' domains. If any domain becomes empty, backtracks immediately without wasting time.
 
-**Min-Conflicts (Local Search)** — No search tree. Fills each box with a valid permutation, then swaps cells to reduce row/column conflicts. Sideways moves escape plateaus. Stale detection triggers early restarts.
+**Min-Conflicts (Local Search)** — A completely different paradigm. Fills the board randomly and iteratively repairs conflicts by swapping values within 3×3 boxes. No search tree — purely iterative repair. *(Early stage)*
 
 ---
 
 ## How to Run
 
-**Backend demo** (no dependencies):
+No external dependencies — pure Python 3.
+
 ```bash
 python demo.py
 ```
 
-**Frontend** (no server needed):
-```
-Open frontend/index.html in any browser
-```
+This runs the available solvers on built-in easy and hard sample puzzles and prints a comparison of their performance.
 
 ---
 
@@ -52,49 +50,45 @@ Open frontend/index.html in any browser
 
 ```
 ├── common/                  # Shared foundation
-│   ├── board.py             # SudokuBoard class
-│   ├── constraints.py       # Validation and legal values
-│   └── generator.py         # Puzzle generation (4 levels)
+│   ├── board.py             # SudokuBoard — grid, clone, neighbors
+│   ├── constraints.py       # Validation and legal value computation
+│   └── generator.py         # Puzzle generation (4 difficulty levels)
 │
 ├── salwa/                   # Salwa's work
-│   ├── backtracking.py      # Plain Backtracking
-│   └── mrv_solver.py        # MRV + Degree + LCV
+│   ├── backtracking.py      # Plain Backtracking solver
+│   └── mrv_solver.py        # Backtracking + MRV solver
 │
 ├── anjali/                  # Anjali's work
-│   ├── domains.py           # Domain tracker
-│   ├── forward_checking.py  # Forward Checking + AC-3
-│   └── metrics.py           # Collection + comparison table
+│   ├── domains.py           # Domain tracker for forward checking
+│   ├── forward_checking.py  # MRV + Forward Checking solver
+│   └── metrics.py           # Performance metrics collector
 │
 ├── ayush/                   # Ayush's work
-│   ├── min_conflicts.py     # Min-Conflicts (box swaps)
-│   └── runner.py            # Strategy runner (all 4 solvers)
+│   ├── min_conflicts.py     # Min-Conflicts local search solver
+│   └── runner.py            # Strategy runner orchestration
 │
-├── frontend/                # Web UI
-│   ├── index.html           # Home, play, result screens
-│   ├── style.css            # Styling
-│   └── app.js               # Game logic + all 4 JS solvers
-│
-├── demo.py                  # Run and compare all solvers
+├── demo.py                  # Run and compare solvers
 └── README.md
 ```
 
 ---
 
-## What Changed Since PR1
+## Current Status
 
-- **MRV solver** now includes degree heuristic tiebreaker and LCV value ordering (Salwa)
-- **Forward Checking** now includes AC-3 arc consistency propagation (Anjali)
-- **Min-Conflicts** fully optimized with sideways moves, stale detection, and integrated into runner (Ayush)
-- **Metrics** upgraded with formatted comparison table and speedup analysis (Anjali)
-- **Frontend** built — interactive board, difficulty selection, hints, AI solve with all 4 algorithms, result page with metrics (Ayush)
-- **Runner** now orchestrates all 4 solvers (Ayush)
+- **Board, Constraints, Generator** — Complete. Supports 9×9 grids, four difficulty levels (Easy/Medium/Hard/Expert), neighbor lookups, and board cloning for solver isolation.
+- **Plain Backtracking** — Complete. Serves as the performance baseline.
+- **Backtracking + MRV** — Core MRV selection working. Degree heuristic tiebreaker and LCV ordering planned.
+- **MRV + Forward Checking** — Functional with domain pruning. AC-3 arc consistency planned.
+- **Metrics Collection** — Basic timing and metric recording. Chart visualization planned.
+- **Min-Conflicts** — Early-stage box-swap approach. Not yet integrated into the runner.
 
 ---
 
 ## Next Steps
 
-- Step-by-step solve animation in frontend
-- Full benchmark suite across all difficulty levels with statistical averaging
-- Metrics chart visualization with matplotlib
-- Enhanced algorithm explanation pages with step-by-step walkthrough
-- Final UI polish and comprehensive comparison report
+- Optimize Min-Conflicts with sideways moves and stale detection (Ayush)
+- Add degree heuristic tiebreaker and LCV value ordering to MRV (Salwa)
+- Implement AC-3 arc consistency propagation (Anjali)
+- Build metrics chart visualization (Anjali)
+- Develop interactive web frontend with hints and AI solve modes (Ayush)
+- Full benchmark suite across all difficulty levels (All)
