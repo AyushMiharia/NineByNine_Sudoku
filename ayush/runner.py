@@ -1,59 +1,72 @@
 """
-Strategy Runner - Orchestrates Solver Comparison
+Strategy Runner
 Author: Ayush
-Status: IN PROGRESS - basic runner done, UI integration pending
-
-Runs available solvers on the same board and collects metrics.
+Status: Complete (upgraded in PR2)
+  - PR1: Ran 3 solvers only
+  - PR2: All 4 solvers, improved hint, JSON output for frontend
 """
 
-import sys
-import os
-
+import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from common.board import SudokuBoard
+from common.constraints import get_legal_values
 from salwa.backtracking import BacktrackingSolver
 from salwa.mrv_solver import MRVSolver
 from anjali.forward_checking import ForwardCheckingSolver
+from ayush.min_conflicts import MinConflictsSolver
 from anjali.metrics import MetricsCollector
 
 
 class StrategyRunner:
-
     def __init__(self):
         self.collector = MetricsCollector()
         self.solvers = [
             BacktrackingSolver(),
             MRVSolver(),
             ForwardCheckingSolver(),
-            # MinConflictsSolver — will be added once optimized
+            MinConflictsSolver(max_iters=200000, max_restarts=20),
         ]
+        self.solved_boards = {}
 
-    def run_all(self, original_board):
+    def run_all(self, board):
         """Run all solvers on clones of the given board."""
         self.collector = MetricsCollector()
-
-        print("Running solver comparison...")
-        print(original_board)
-        print()
+        self.solved_boards = {}
 
         for solver in self.solvers:
-            board_copy = original_board.clone()
+            copy = board.clone()
             name = solver.NAME
 
-            self.collector.start_timer()
-            solved = solver.solve(board_copy)
-            elapsed = self.collector.stop_timer()
+            self.collector.start()
+            solved = solver.solve(copy)
+            elapsed = self.collector.stop()
 
-            self.collector.record(name, solved, elapsed, solver.get_metrics())
+            extra = {}
+            if hasattr(solver, "iterations_used"):
+                extra["iterations"] = solver.iterations_used
+                extra["restarts"] = solver.restarts_used
+            if hasattr(solver, "arc_revisions"):
+                extra["arc_revisions"] = solver.arc_revisions
+
+            self.collector.record(name, solved, elapsed, solver.get_metrics(), extra)
+
+            if solved:
+                self.solved_boards[name] = copy
+
             status = "Solved" if solved else "Failed"
-            print(f"  {name}: {status} in {elapsed:.6f}s")
+            print(f"  {name:<32} {status} in {elapsed:.6f}s")
 
         return self.collector
 
-
-# TODO (Ayush):
-# - Add MinConflictsSolver once swap optimization is done
-# - Build interactive React frontend with solver selection
-# - Add hint system using MRV to pick next best cell
-# - Result page with algorithm explanation and metrics display
+    def get_hint(self, grid):
+        """Return the most constrained empty cell and its best value."""
+        board = SudokuBoard(grid)
+        best, mn = None, float("inf")
+        for r, c in board.get_empty_cells():
+            lv = get_legal_values(board, r, c)
+            if 0 < len(lv) < mn:
+                mn = len(lv)
+                best = (r, c, min(lv))
+                if mn == 1: break
+        return best

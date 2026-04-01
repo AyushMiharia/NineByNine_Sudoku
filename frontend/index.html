@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NineByNine AI - Sudoku CSP Solver</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- HOME -->
+    <div id="home-screen" class="screen active">
+        <div class="home-wrap">
+            <h1 class="logo">NineByNine<span>AI</span></h1>
+            <p class="subtitle">Sudoku CSP Solver</p>
+            <p class="desc">Play puzzles and watch AI solve them using different CSP strategies</p>
+            <div class="diff-grid">
+                <button class="diff-card" onclick="startGame('easy')">
+                    <div class="diff-icon">🌱</div><div class="diff-name">Easy</div><div class="diff-clue">45 clues</div>
+                </button>
+                <button class="diff-card" onclick="startGame('medium')">
+                    <div class="diff-icon">🧩</div><div class="diff-name">Medium</div><div class="diff-clue">35 clues</div>
+                </button>
+                <button class="diff-card" onclick="startGame('hard')">
+                    <div class="diff-icon">🔥</div><div class="diff-name">Hard</div><div class="diff-clue">28 clues</div>
+                </button>
+                <button class="diff-card" onclick="startGame('expert')">
+                    <div class="diff-icon">💀</div><div class="diff-name">Expert</div><div class="diff-clue">22 clues</div>
+                </button>
+            </div>
+            <p class="credits">CS 5100 — Ayush, Salwa, Anjali</p>
+        </div>
+    </div>
+
+    <!-- PLAY -->
+    <div id="play-screen" class="screen">
+        <div class="top-bar">
+            <button class="btn-ghost" onclick="goHome()">← Home</button>
+            <div class="top-info">
+                <span id="badge" class="badge">EASY</span>
+                <span id="timer" class="timer">00:00</span>
+                <span id="hints-used" class="small-text">Hints: 0</span>
+            </div>
+        </div>
+        <div id="win-banner" class="win-banner hidden">🎉 Puzzle Complete!</div>
+        <div class="play-row">
+            <div class="board-col">
+                <div id="board" class="board"></div>
+                <div class="numpad" id="numpad"></div>
+                <div class="actions">
+                    <button class="act-btn" onclick="eraseCell()">✕ Erase</button>
+                    <button class="act-btn hint-btn" onclick="doHint()">💡 Hint</button>
+                    <button class="act-btn ai-btn" id="ai-toggle" onclick="toggleAI()">🤖 Let AI Solve</button>
+                </div>
+            </div>
+            <div class="side-col">
+                <div id="panel-info">
+                    <h3>How to Play</h3>
+                    <p>Click a cell, then type or tap a number (1-9).</p>
+                    <p>Arrow keys to move between cells.</p>
+                    <p><b>Hint</b> shows the best next move.</p>
+                    <p><b>Let AI Solve</b> picks an algorithm to watch.</p>
+                    <div class="box rules-box"><div class="box-label">RULES</div>Each row, column, and 3×3 box must contain 1-9 exactly once.</div>
+                    <div class="box stats-box"><div class="box-label">STATS</div>
+                        <div>Empty: <span id="st-empty">0</span></div>
+                        <div>Errors: <span id="st-errors">None</span></div>
+                    </div>
+                </div>
+                <div id="panel-ai" class="hidden">
+                    <h3>AI Strategies</h3>
+                    <p class="ai-sub">Pick an algorithm to solve this puzzle</p>
+                    <button class="algo-btn" onclick="aiSolve('backtracking')"><span class="algo-ic">↩️</span><div><div class="algo-nm">Plain Backtracking</div><div class="algo-tg">Brute-force explorer</div></div><span class="algo-ar">→</span></button>
+                    <button class="algo-btn" onclick="aiSolve('mrv')"><span class="algo-ic">🎯</span><div><div class="algo-nm">Backtracking + MRV</div><div class="algo-tg">Smart variable picker + LCV</div></div><span class="algo-ar">→</span></button>
+                    <button class="algo-btn" onclick="aiSolve('fc')"><span class="algo-ic">⚡</span><div><div class="algo-nm">MRV + Forward Checking</div><div class="algo-tg">Constraint propagator + AC-3</div></div><span class="algo-ar">→</span></button>
+                    <button class="algo-btn" onclick="aiSolve('mincon')"><span class="algo-ic">🔄</span><div><div class="algo-nm">Min-Conflicts</div><div class="algo-tg">Local search with box swaps</div></div><span class="algo-ar">→</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESULT -->
+    <div id="result-screen" class="screen">
+        <div class="res-top">
+            <button class="btn-ghost" onclick="goPlay()">← Back</button>
+            <button class="btn-ghost" onclick="goHome()">🏠 Home</button>
+        </div>
+        <div class="res-title"><span id="res-icon"></span><div><h1 id="res-name"></h1><p id="res-tag" class="res-tag"></p></div></div>
+        <div class="res-row">
+            <div class="res-left">
+                <div class="card"><h3>Overview</h3><p id="res-desc"></p></div>
+                <div class="card"><h3>Performance</h3><div id="res-metrics" class="met-grid"></div></div>
+            </div>
+            <div class="res-right">
+                <h3>Solved Board</h3>
+                <div id="res-board" class="board sm-board"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

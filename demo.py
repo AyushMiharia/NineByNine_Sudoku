@@ -1,14 +1,10 @@
 #!/usr/bin/env python3
 """
-Progress Demo - Run available solvers on a sample puzzle.
-Shows current working state of the project.
-
-Usage: python demo.py
+NineByNine AI - Progress Report 2 Demo
+Runs all 4 solvers on easy and hard puzzles.
 """
 
-import sys
-import os
-
+import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from common.board import SudokuBoard
@@ -17,37 +13,33 @@ from ayush.runner import StrategyRunner
 
 
 def main():
-    print("=" * 50)
-    print("  NineByNine AI - Progress Demo")
+    print("=" * 60)
+    print("  NineByNine AI - Progress Report 2 Demo")
     print("  CS 5100 - Foundations of AI")
-    print("=" * 50)
-
-    # Run on easy puzzle
-    print("\n--- EASY PUZZLE ---")
-    board = SudokuBoard(SAMPLE_PUZZLES["easy"])
-    board.save_original()
+    print("=" * 60)
 
     runner = StrategyRunner()
+
+    for name, grid in SAMPLE_PUZZLES.items():
+        print(f"\n{'─' * 60}")
+        print(f"  {name.upper()} PUZZLE")
+        print(f"{'─' * 60}")
+        board = SudokuBoard(grid)
+        board.save_original()
+        print(board)
+        print()
+        collector = runner.run_all(board)
+        collector.print_comparison()
+
+    print(f"\n{'─' * 60}")
+    print("  GENERATED MEDIUM PUZZLE")
+    print(f"{'─' * 60}")
+    from common.generator import generate_puzzle
+    board, _ = generate_puzzle("medium")
+    print(board)
+    print()
     collector = runner.run_all(board)
-
-    print("\nResults:")
-    for r in collector.get_comparison_table():
-        print(f"  {r['Solver']:<28} {r['Solved']:<6} {r['Time (s)']:>12}  Nodes: {r['Nodes']}")
-
-    fastest = collector.get_fastest()
-    if fastest:
-        print(f"\n  Fastest: {fastest.solver_name} ({fastest.execution_time:.6f}s)")
-
-    print("\n--- HARD PUZZLE ---")
-    board2 = SudokuBoard(SAMPLE_PUZZLES["hard"])
-    board2.save_original()
-
-    runner2 = StrategyRunner()
-    collector2 = runner2.run_all(board2)
-
-    print("\nResults:")
-    for r in collector2.get_comparison_table():
-        print(f"  {r['Solver']:<28} {r['Solved']:<6} {r['Time (s)']:>12}  Nodes: {r['Nodes']}")
+    collector.print_comparison()
 
 
 if __name__ == "__main__":
