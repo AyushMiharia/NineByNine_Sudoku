@@ -1,10 +1,4 @@
-"""
-Backtracking + MRV Solver with Degree Heuristic & LCV
-Author: Salwa
-Status: Complete (upgraded in PR2)
-  - PR1: Basic MRV selection
-  - PR2: Added degree heuristic tiebreaker and LCV value ordering
-"""
+"""MRV backtracking for Sudoku (degree tie-break + LCV ordering)."""
 
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -26,7 +20,7 @@ class MRVSolver:
         return self._bt(board)
 
     def _degree(self, board, row, col):
-        """Count how many unassigned neighbors this cell has (degree heuristic)."""
+        """Unassigned neighbors (for tie-breaking)."""
         count = 0
         for nr, nc in board.get_neighbors(row, col):
             if board.is_empty(nr, nc):
@@ -34,11 +28,7 @@ class MRVSolver:
         return count
 
     def _lcv_order(self, board, row, col, values):
-        """
-        Least Constraining Value: order values by how many options they
-        leave for neighboring cells. Prefer values that rule out the fewest
-        choices for neighbors.
-        """
+        """Sort candidate values so we try the least constraining first."""
         def count_eliminated(val):
             total = 0
             for nr, nc in board.get_neighbors(row, col):
@@ -52,11 +42,7 @@ class MRVSolver:
         return sorted(values, key=count_eliminated)
 
     def _select_mrv(self, board):
-        """
-        Select variable using MRV with degree heuristic tiebreaker.
-        Among cells with equal MRV, pick the one with the highest degree
-        (most unassigned neighbors) to fail faster.
-        """
+        """Pick empty cell with smallest domain; ties -> higher degree."""
         empty_cells = board.get_empty_cells()
         if not empty_cells:
             return None, set()
@@ -77,7 +63,7 @@ class MRVSolver:
                 best_cell = (row, col)
                 best_values = legal
                 if min_count == 0:
-                    break  # Dead end, no point looking further
+                    break
 
         return best_cell, best_values
 
@@ -90,7 +76,6 @@ class MRVSolver:
         r, c = cell
         self.nodes_expanded += 1
 
-        # Order values by LCV
         ordered_vals = self._lcv_order(board, r, c, vals)
 
         for v in ordered_vals:

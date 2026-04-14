@@ -1,10 +1,4 @@
-"""
-Strategy Runner
-Author: Ayush
-Status: Complete (upgraded in PR2)
-  - PR1: Ran 3 solvers only
-  - PR2: All 4 solvers, improved hint, JSON output for frontend
-"""
+"""Run all solvers on a board and collect timings."""
 
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -30,7 +24,6 @@ class StrategyRunner:
         self.solved_boards = {}
 
     def run_all(self, board):
-        """Run all solvers on clones of the given board."""
         self.collector = MetricsCollector()
         self.solved_boards = {}
 
@@ -60,7 +53,6 @@ class StrategyRunner:
         return self.collector
 
     def get_hint(self, grid):
-        """Return the most constrained empty cell and its best value."""
         board = SudokuBoard(grid)
         best, mn = None, float("inf")
         for r, c in board.get_empty_cells():

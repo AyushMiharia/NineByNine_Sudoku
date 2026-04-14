@@ -1,9 +1,3 @@
-"""
-Puzzle Generator
-Author: Salwa
-Status: Complete (since PR1)
-"""
-
 import random
 from common.board import SudokuBoard
 from common.constraints import is_valid_placement

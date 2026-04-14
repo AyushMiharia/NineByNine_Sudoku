@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playing · NinebyNine Sudoku AI</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="play-screen" class="screen active">
+        <div class="top-bar">
+            <button type="button" class="btn-ghost" data-act="go-home">← back home</button>
+            <div class="top-info">
+                <span id="badge" class="badge">EASY</span>
+                <span id="timer" class="timer">00:00</span>
+                <span id="hints-used" class="small-text">hints: 0</span>
+            </div>
+        </div>
+        <div id="win-banner" class="win-banner hidden">Board is full and consistent. Nice.</div>
+        <div class="play-row">
+            <div class="board-col">
+                <div id="board" class="board"></div>
+                <div class="numpad" id="numpad"></div>
+                <div class="actions">
+                    <button type="button" class="act-btn" data-act="erase">Clear Cell</button>
+                    <button type="button" class="act-btn hint-btn" data-act="hint">Hint</button>
+                    <button type="button" class="act-btn ai-btn" id="ai-toggle" data-act="toggle-ai">Run AI Solver</button>
+                </div>
+            </div>
+            <div class="side-col">
+                <div id="panel-info">
+                    <h3>How Sudoku Works</h3>
+                    <p>The goal is to fill every empty cell with a number from 1 to 9 so that each row, each column, and each 3×3 box contains all digits exactly once. You use logic to figure out which numbers can go in each spot based on what’s already filled in. No guessing is needed, every move should follow from the constraints.</p>
+                    <div class="box rules-box"><div class="box-label">Constraints</div>Each row, column, and 3×3 box needs digits 1–9 exactly once.</div>
+                    <div class="box stats-box"><div class="box-label">live</div>
+                        <div>empty: <span id="st-empty">0</span></div>
+                        <div>conflicts: <span id="st-errors">none</span></div>
+                    </div>
+                </div>
+                <div id="panel-ai" class="hidden">
+                    <h3>Explore AI Solvers<h3>
+                    <p class="ai-sub">Watch how each algorithm solves the puzzle step by step.</p>
+                    <button type="button" class="algo-btn" data-act="ai" data-algo="backtracking"><span class="algo-ic">01</span><div><div class="algo-nm">Backtracking</div><div class="algo-tg">first empty cell, try 1–9</div></div><span class="algo-ar">→</span></button>
+                    <button type="button" class="algo-btn" data-act="ai" data-algo="mrv"><span class="algo-ic">02</span><div><div class="algo-nm">Minimum Remaining Value (MRV)</div><div class="algo-tg">fewest options first</div></div><span class="algo-ar">→</span></button>
+                    <button type="button" class="algo-btn" data-act="ai" data-algo="fc"><span class="algo-ic">03</span><div><div class="algo-nm">Forward checking</div><div class="algo-tg">+ AC-3 after assignments</div></div><span class="algo-ar">→</span></button>
+                    <button type="button" class="algo-btn" data-act="ai" data-algo="mincon"><span class="algo-ic">04</span><div><div class="algo-nm">Min-conflicts</div><div class="algo-tg">local search, box swaps</div></div><span class="algo-ar">→</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="result-screen" class="screen">
+        <div class="res-top">
+            <button type="button" class="btn-ghost" data-act="go-play">← puzzle</button>
+            <button type="button" class="btn-ghost" data-act="go-home">home</button>
+        </div>
+        <div class="res-title"><span id="res-icon"></span><div><h1 id="res-name"></h1><p id="res-tag" class="res-tag"></p></div></div>
+        <div class="res-row">
+            <div class="res-left">
+                <div class="card"><h3 id="res-how-title">How it works</h3><p id="res-desc"></p></div>
+                <div class="card"><h3> + counters</h3><div id="res-metrics" class="met-grid"></div></div>
+            </div>
+            <div class="res-right">
+                <h3>Grid Returned</h3>
+                <div id="res-board" class="board sm-board"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

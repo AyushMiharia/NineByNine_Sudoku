@@ -1,10 +1,3 @@
-"""
-Domain Tracking for Forward Checking
-Author: Anjali
-Status: Complete (since PR1)
-"""
-
-
 class DomainTracker:
     def __init__(self, board):
         self.size = board.SIZE

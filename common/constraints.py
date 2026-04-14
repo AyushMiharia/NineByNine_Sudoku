@@ -1,10 +1,3 @@
-"""
-Constraint Checking
-Author: Salwa
-Status: Complete (since PR1)
-"""
-
-
 def is_valid_placement(board, row, col, value):
     for c in range(9):
         if c != col and board.get(row, c) == value: return False

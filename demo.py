@@ -1,45 +1,35 @@
 #!/usr/bin/env python3
-"""
-NineByNine AI - Progress Report 2 Demo
-Runs all 4 solvers on easy and hard puzzles.
-"""
+"""Quick terminal demo: sample puzzles + one generated board."""
 
-import sys, os
+import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from common.board import SudokuBoard
-from common.generator import SAMPLE_PUZZLES
+from common.generator import SAMPLE_PUZZLES, generate_puzzle
 from ayush.runner import StrategyRunner
 
 
 def main():
-    print("=" * 60)
-    print("  NineByNine AI - Progress Report 2 Demo")
-    print("  CS 5100 - Foundations of AI")
-    print("=" * 60)
+    print("NineByNine / CS 5100 demo")
+    print("-" * 40)
 
     runner = StrategyRunner()
 
     for name, grid in SAMPLE_PUZZLES.items():
-        print(f"\n{'─' * 60}")
-        print(f"  {name.upper()} PUZZLE")
-        print(f"{'─' * 60}")
+        print(f"\n{name.upper()}")
         board = SudokuBoard(grid)
         board.save_original()
         print(board)
         print()
-        collector = runner.run_all(board)
-        collector.print_comparison()
+        runner.run_all(board).print_comparison()
 
-    print(f"\n{'─' * 60}")
-    print("  GENERATED MEDIUM PUZZLE")
-    print(f"{'─' * 60}")
-    from common.generator import generate_puzzle
+    print("\nRandom medium")
     board, _ = generate_puzzle("medium")
     print(board)
     print()
-    collector = runner.run_all(board)
-    collector.print_comparison()
+    runner.run_all(board).print_comparison()
 
 
 if __name__ == "__main__":

@@ -1,8 +1,4 @@
-"""
-Plain Backtracking Solver
-Author: Salwa
-Status: Complete (since PR1)
-"""
+"""Naive backtracking: first empty cell, try 1-9."""
 
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))

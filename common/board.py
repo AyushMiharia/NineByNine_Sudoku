@@ -1,8 +1,4 @@
-"""
-Board Representation for Sudoku CSP Solver
-Author: Salwa
-Status: Complete (since PR1)
-"""
+"""9x9 Sudoku grid wrapper."""
 
 import random
 

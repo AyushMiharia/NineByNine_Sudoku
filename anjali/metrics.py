@@ -1,11 +1,3 @@
-"""
-Metrics Collection and Comparison
-Author: Anjali
-Status: Complete (upgraded in PR2)
-  - PR1: Basic collection and JSON export
-  - PR2: Added formatted comparison table, speedup analysis, summary stats
-"""
-
 import time
 
 
@@ -19,7 +11,6 @@ class SolverMetrics:
         self.checks = checks
         self.extra = extra or {}
 
-    # PR1-compatible aliases
     @property
     def solver_name(self): return self.name
     @property
@@ -60,9 +51,7 @@ class MetricsCollector:
     def to_json(self):
         return [r.to_dict() for r in self.results]
 
-    # PR1-compatible alias
     def get_comparison_table(self):
-        """Return list of dicts with PR1-compatible keys."""
         out = []
         for r in self.results:
             out.append({
@@ -81,7 +70,6 @@ class MetricsCollector:
         return min(ok, key=lambda r: r.nodes) if ok else None
 
     def print_comparison(self):
-        """Print a formatted comparison table to the terminal."""
         if not self.results:
             print("No results recorded.")
             return
@@ -89,14 +77,12 @@ class MetricsCollector:
         cols = ["Solver", "Solved", "Time (s)", "Nodes", "Backtracks", "Checks"]
         widths = [30, 8, 12, 12, 12, 14]
 
-        # Header
         header = " | ".join(f"{c:<{w}}" for c, w in zip(cols, widths))
         sep = "-+-".join("-" * w for w in widths)
         print(sep)
         print(header)
         print(sep)
 
-        # Rows
         for r in self.results:
             vals = [
                 r.name,
@@ -110,7 +96,6 @@ class MetricsCollector:
 
         print(sep)
 
-        # Summary
         fastest = self.get_fastest()
         efficient = self.get_most_efficient()
         if fastest:
@@ -118,7 +103,6 @@ class MetricsCollector:
         if efficient:
             print(f"  Most Efficient: {efficient.name} ({efficient.nodes:,} nodes)")
 
-        # Speedup vs baseline
         solved = [r for r in self.results if r.solved]
         if len(solved) >= 2:
             base = solved[0]
@@ -128,6 +112,3 @@ class MetricsCollector:
                     if r.time > 0:
                         sp = base.time / r.time
                         print(f"    {r.name:<30} {sp:.1f}x")
-
-# TODO: Export to CSV
-# TODO: Bar chart visualization with matplotlib (PR3)

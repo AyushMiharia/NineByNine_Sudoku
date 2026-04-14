@@ -1,11 +1,4 @@
-"""
-Min-Conflicts Local Search Solver (Box-Swap Variant)
-Author: Ayush
-Status: Complete (upgraded in PR2)
-  - PR1: Basic box-swap structure
-  - PR2: Sideways moves with probability, stale detection for early
-          restart, optimized conflict counting, fully integrated
-"""
+"""Min-conflicts with random swaps inside 3x3 boxes."""
 
 import random
 
@@ -38,7 +31,6 @@ class MinConflictsSolver:
         for restart in range(self.max_restarts):
             self.restarts_used = restart + 1
 
-            # Clear non-fixed cells
             for r in range(9):
                 for c in range(9):
                     if (r, c) not in fixed:
@@ -53,7 +45,7 @@ class MinConflictsSolver:
         return False
 
     def _init_boxes(self, board, fixed):
-        """Fill each 3x3 box with a valid permutation of missing values."""
+        """Permute missing values inside each box."""
         for br in range(0, 9, 3):
             for bc in range(0, 9, 3):
                 used, empty = set(), []
@@ -69,7 +61,7 @@ class MinConflictsSolver:
                     board.set(r, c, avail[i])
 
     def _rc_conflicts(self, board, r, c):
-        """Count row + column conflicts (boxes always valid by construction)."""
+        """Row/column clashes for one cell."""
         v = board.get(r, c)
         if v == 0: return 0
         self.constraint_checks += 1
@@ -87,7 +79,6 @@ class MinConflictsSolver:
         return t // 2
 
     def _repair(self, board, fixed):
-        """Swap-based repair with sideways moves and stale detection."""
         stale = 0
         best_total = self._total_conflicts(board)
 
@@ -97,7 +88,6 @@ class MinConflictsSolver:
             if best_total == 0:
                 return True
 
-            # Pick a random box
             br, bc = random.choice([0, 3, 6]), random.choice([0, 3, 6])
             swappable = [(r, c) for r in range(br, br+3) for c in range(bc, bc+3) if (r, c) not in fixed]
 
@@ -121,19 +111,15 @@ class MinConflictsSolver:
             delta = new - old
 
             if delta < 0:
-                # Improvement — keep
                 best_total += delta
                 stale = 0
             elif delta == 0 and random.random() < 0.3:
-                # Sideways move with 30% probability to escape plateaus
                 stale += 1
             else:
-                # Undo
                 board.set(r1, col1, v1)
                 board.set(r2, col2, v2)
                 stale += 1
 
-            # Stale detection — restart early if stuck
             if stale > 5000:
                 break
 
