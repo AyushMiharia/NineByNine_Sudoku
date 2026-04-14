@@ -103,6 +103,13 @@ body {
   opacity: 0.92;
 }
 
+.desc-note {
+  color: #d4cfc7;
+  font-size: 0.78rem;
+  margin: 8px auto 10px;
+  max-width: 34rem;
+}
+
 .diff-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -590,6 +597,13 @@ body {
   color: #d4cfc7;
   font-size: 0.84rem;
   line-height: 1.55;
+}
+
+.res-note {
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  line-height: 1.45;
+  margin-bottom: 8px;
 }
 
 .met-grid {

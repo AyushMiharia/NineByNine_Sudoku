@@ -120,6 +120,11 @@ function formatSolveMs(ms) {
     return `${ms.toFixed(1)} ms`;
 }
 
+function formatSeconds(ms) {
+    if (ms < 0) return "—";
+    return `${(ms / 1000).toFixed(2)} s`;
+}
+
 function solveBT(grid, opts) {
     const trace = opts && opts.recordTrace ? [] : null;
     const SNAP_CAP = 6500;
@@ -648,32 +653,36 @@ const ALGOS = {
     backtracking: {
         name: "Backtracking",
         icon: "01",
-        desc: "Walk the grid, try digits, undo when you hit a conflict. Mostly here so the faster ones have something to beat.",
+        desc: "Systematically assigns values to empty cells, checks constraints after each assignment, and backtracks when a conflict occurs.",
         solver: solveBT,
+        insight: "Backtracking is the baseline depth-first CSP search strategy.",
     },
     mrv: {
         name: "Minimum Remaining Value (MRV)",
         icon: "02",
-        desc: "Select the empty cell with the smallest domain (MRV). Then try values in an order that minimizes impact on neighboring cells to reduce conflicts.",
+        desc: "Selects the empty cell with the fewest legal values remaining to reduce branching during search.",
         solver: solveMRV,
+        insight: "MRV reduces the branching factor by choosing the most constrained variable first.",
     },
     fc: {
-        name: "Forward checking",
+        name: "Forward Checking",
         icon: "03",
-        desc: "Track possible values for each cell. After assigning a number, remove that value from neighboring cells. If any cell has no valid values left, backtrack.",
+        desc: "Updates neighboring domains after each assignment and stops early when a future conflict is detected.",
         solver: solveFC,
+        insight: "Forward checking performs early constraint propagation to prune infeasible branches.",
     },
     mincon: {
-        name: "Min Conflicts",
+        name: "Min-Conflicts",
         icon: "04",
-        desc: "Start with a full board (may have conflicts). Repeatedly pick a conflicted cell and assign the value that minimizes conflicts. May not always reach a solution..",
+        desc: "Starts with a complete assignment and iteratively repairs conflicts using local search.",
         solver: solveMinCon,
+        insight: "Min-Conflicts trades exhaustive search for iterative conflict minimization.",
     },
 };
 
 const RESULT_HOW_TITLE = {
     backtracking: "How Backtracking Works",
-    mrv: "How MRV + LCV Works",
+    mrv: "How MRV Works",
     fc: "How Forward Checking Works",
     mincon: "How Min-Conflicts Works",
 };
@@ -801,7 +810,7 @@ function render() {
         }
     }
     document.getElementById("st-empty").textContent = String(empty);
-    document.getElementById("st-errors").textContent = errors.size ? String(errors.size) : "none";
+    document.getElementById("st-errors").textContent = String(errors.size);
 }
 
 function clickCell(r, c) {
@@ -954,8 +963,8 @@ function aiSolve(key) {
     document.getElementById("res-icon").textContent = info.icon;
     document.getElementById("res-name").textContent = info.name;
     const tagEl = document.getElementById("res-tag");
-    if (info.tag) {
-        tagEl.textContent = info.tag;
+    if (info.insight) {
+        tagEl.textContent = info.insight;
         tagEl.style.display = "";
     } else {
         tagEl.textContent = "";
@@ -969,6 +978,11 @@ function aiSolve(key) {
     document.getElementById("res-desc").textContent = canAnimate
         ? `${info.desc} The board below replays recorded steps (very long runs are sampled so the page stays responsive).`
         : info.desc;
+    const metricNote = document.getElementById("res-metric-note");
+    if (metricNote) {
+        metricNote.textContent =
+            "These metrics help compare how efficiently each solver explores the search space.";
+    }
 
     const m = res.metrics;
     const solveMs = m.solveMs != null ? m.solveMs : m.time != null ? m.time : 0;
@@ -977,10 +991,10 @@ function aiSolve(key) {
 
     const rows = [
         { l: "Status", v: res.solved ? "Solved" : "Failed", c: res.solved ? "#22c55e" : "#ef4444" },
-        { l: "Algorithm Time", v: formatSolveMs(solveMs), c: "#fbbf24" },
-        { l: "Nodes", v: m.nodes.toLocaleString(), c: "#60a5fa" },
+        { l: "Runtime", v: formatSolveMs(solveMs), c: "#fbbf24" },
+        { l: "Nodes Explored", v: m.nodes.toLocaleString(), c: "#60a5fa" },
         { l: "Backtracks", v: m.backtracks.toLocaleString(), c: "#fb923c" },
-        { l: "Checks", v: m.checks.toLocaleString(), c: "#a78bfa" },
+        { l: "Constraint Checks", v: m.checks.toLocaleString(), c: "#a78bfa" },
     ];
 
     for (const row of rows) {
@@ -997,13 +1011,25 @@ function aiSolve(key) {
             '<div class="met-label">Animation Time</div><div class="met-val" id="met-anim-val" style="color:#94a3b8">…</div>';
         mg.appendChild(anim);
     }
-
+    const runtimeNote = document.getElementById("res-runtime-note");
+    if (runtimeNote) {
+        runtimeNote.textContent =
+            "Runtime measures solver computation only; animation time reflects visualization playback.";
+        runtimeNote.classList.toggle("hidden", !canAnimate);
+    }
+    const statusNote = document.getElementById("res-status");
+    if (statusNote) {
+        statusNote.textContent = canAnimate
+            ? "Solver status: replaying recorded steps."
+            : "Solver status: displaying computed final state.";
+        statusNote.classList.remove("hidden");
+    }
     const rb = document.getElementById("res-board");
     const cells = buildResultBoardCells(rb);
     show("result-screen");
     runTraceAnimation(canAnimate ? trace : null, puzzle, res.grid, cells, runId, (playbackWallMs) => {
         const el = document.getElementById("met-anim-val");
-        if (el) el.textContent = formatSolveMs(playbackWallMs);
+        if (el) el.textContent = formatSeconds(playbackWallMs);
     });
 }
 

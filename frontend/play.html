@@ -30,20 +30,20 @@
             <div class="side-col">
                 <div id="panel-info">
                     <h3>How Sudoku Works</h3>
-                    <p>The goal is to fill every empty cell with a number from 1 to 9 so that each row, each column, and each 3×3 box contains all digits exactly once. You use logic to figure out which numbers can go in each spot based on what’s already filled in. No guessing is needed, every move should follow from the constraints.</p>
-                    <div class="box rules-box"><div class="box-label">Constraints</div>Each row, column, and 3×3 box needs digits 1–9 exactly once.</div>
-                    <div class="box stats-box"><div class="box-label">live</div>
-                        <div>empty: <span id="st-empty">0</span></div>
-                        <div>conflicts: <span id="st-errors">none</span></div>
+                    <p>Fill every empty cell with a number from 1 to 9 so that each row, column, and 3×3 box contains all digits exactly once. Use logic based on the existing numbers. No guessing is needed.</p>
+                    <div class="box rules-box"><div class="box-label">Constraints</div>Valid moves must satisfy row, column, and 3×3 box constraints.</div>
+                    <div class="box stats-box"><div class="box-label">Board Status</div>
+                        <div>Empty cells: <span id="st-empty">0</span></div>
+                        <div>Conflicts: <span id="st-errors">0</span></div>
                     </div>
                 </div>
                 <div id="panel-ai" class="hidden">
-                    <h3>Explore AI Solvers<h3>
+                    <h3>Explore AI Solvers</h3>
                     <p class="ai-sub">Watch how each algorithm solves the puzzle step by step.</p>
                     <button type="button" class="algo-btn" data-act="ai" data-algo="backtracking"><span class="algo-ic">01</span><div><div class="algo-nm">Backtracking</div><div class="algo-tg">first empty cell, try 1–9</div></div><span class="algo-ar">→</span></button>
                     <button type="button" class="algo-btn" data-act="ai" data-algo="mrv"><span class="algo-ic">02</span><div><div class="algo-nm">Minimum Remaining Value (MRV)</div><div class="algo-tg">fewest options first</div></div><span class="algo-ar">→</span></button>
-                    <button type="button" class="algo-btn" data-act="ai" data-algo="fc"><span class="algo-ic">03</span><div><div class="algo-nm">Forward checking</div><div class="algo-tg">+ AC-3 after assignments</div></div><span class="algo-ar">→</span></button>
-                    <button type="button" class="algo-btn" data-act="ai" data-algo="mincon"><span class="algo-ic">04</span><div><div class="algo-nm">Min-conflicts</div><div class="algo-tg">local search, box swaps</div></div><span class="algo-ar">→</span></button>
+                    <button type="button" class="algo-btn" data-act="ai" data-algo="fc"><span class="algo-ic">03</span><div><div class="algo-nm">Forward Checking</div><div class="algo-tg">domain pruning with look-ahead</div></div><span class="algo-ar">→</span></button>
+                    <button type="button" class="algo-btn" data-act="ai" data-algo="mincon"><span class="algo-ic">04</span><div><div class="algo-nm">Min-Conflicts</div><div class="algo-tg">local search conflict repair</div></div><span class="algo-ar">→</span></button>
                 </div>
             </div>
         </div>
@@ -58,10 +58,16 @@
         <div class="res-row">
             <div class="res-left">
                 <div class="card"><h3 id="res-how-title">How it works</h3><p id="res-desc"></p></div>
-                <div class="card"><h3> + counters</h3><div id="res-metrics" class="met-grid"></div></div>
+                <div class="card">
+                    <h3>Metrics and Counters</h3>
+                    <p id="res-metric-note" class="res-note"></p>
+                    <div id="res-metrics" class="met-grid"></div>
+                    <p id="res-runtime-note" class="res-note hidden"></p>
+                    <p id="res-status" class="res-note hidden"></p>
+                </div>
             </div>
             <div class="res-right">
-                <h3>Grid Returned</h3>
+                <h3>Final Solution</h3>
                 <div id="res-board" class="board sm-board"></div>
             </div>
         </div>
