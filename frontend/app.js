@@ -1,11 +1,6 @@
 /**
- * 9x9 lab — browser side
- *
- * I'm a frontend dev taking CS 5100; I wanted a real grid to click around on while
- * we learned CSP stuff. Teammates wrote the "real" solvers in Python; I re-implemented
- * a few here with performance.now() counters so the results page isn't lying empty.
- *
- * play.html wires buttons with [data-act]; index.html is just the menu.
+ * This is the frontend code of the project. What brought the project to life :)
+ * Includes the game logic and AI solving strategies.
  */
 
 function isValid(g, r, c, n) {
@@ -55,6 +50,9 @@ function genSolved() {
     return g;
 }
 
+/**
+ * Creates puzzle based on the difficulty level.
+ */
 function makePuzzle(d) {
     const clues = { easy: 45, medium: 35, hard: 28 }[d] || 35;
     const sol = genSolved();
@@ -106,6 +104,9 @@ function limitTraceLength(frames, maxLen) {
     return out;
 }
 
+/**
+ * Combines the dedupe and limit trace into a final trace.
+ */
 function finalizeTrace(trace) {
     if (!trace || !trace.length) return [];
     return limitTraceLength(dedupeTrace(trace), 2200);

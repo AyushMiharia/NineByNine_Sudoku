@@ -1,7 +1,9 @@
 /*
-  Styles for the sudoku mini-app.
-  I’m used to writing components in React at work — this is plain CSS on purpose
-  so the whole thing stays easy to open from disk or a static host.
+  Styles for the app
+  Includes:
+  - Home/Landing screen
+  - Puzzle play screen
+  - Solver results and replay controls
 */
 
 :root {
