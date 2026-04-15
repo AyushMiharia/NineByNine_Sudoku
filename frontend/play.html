@@ -1,11 +1,4 @@
-<!--
-  The actual play screen
-  - The 9x9 board
-  - Back button and timer
-  - Actions for clearing cells, getting hints, and running AI solver
-  - Side panel with rules and stats
-  - Result screen with replay controls
--->
+<!-- Play and results screens: board interaction, solver controls, and analysis view -->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -18,7 +11,7 @@
 <body>
     <div id="play-screen" class="screen active">
         <div class="top-bar">
-            <button type="button" class="btn-ghost" data-act="go-home">← back home</button>
+            <button type="button" class="btn-ghost" data-act="go-home">← Back Home</button>
             <div class="top-info">
                 <span id="badge" class="badge">EASY</span>
                 <span id="timer" class="timer">00:00</span>
@@ -60,13 +53,13 @@
 
     <div id="result-screen" class="screen">
         <div class="res-top">
-            <button type="button" class="btn-ghost" data-act="go-play">← puzzle</button>
-            <button type="button" class="btn-ghost" data-act="go-home">home</button>
+            <button type="button" class="btn-ghost" data-act="go-play">← Puzzle</button>
+            <button type="button" class="btn-ghost" data-act="go-home">Home</button>
         </div>
         <div class="res-title"><span id="res-icon"></span><div><h1 id="res-name"></h1><p id="res-tag" class="res-tag"></p></div></div>
         <div class="res-row">
             <div class="res-left">
-                <div class="card"><h3 id="res-how-title">How it works</h3><p id="res-desc"></p></div>
+                <div class="card"><h3 id="res-how-title">How It Works</h3><p id="res-desc"></p></div>
                 <div class="card">
                     <h3>Metrics and Counters</h3>
                     <p id="res-metric-note" class="res-note"></p>

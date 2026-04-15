@@ -749,7 +749,7 @@ function startGame(diff) {
 
     if (!document.getElementById("home-screen")) {
         const label = diff.charAt(0).toUpperCase() + diff.slice(1);
-        document.title = `${label} · NinebyNine lab`;
+        document.title = `${label} · NinebyNine Sudoku AI`;
     }
 }
 
@@ -1028,11 +1028,11 @@ function aiSolve(key) {
     }
 
     const howTitle = document.getElementById("res-how-title");
-    if (howTitle) howTitle.textContent = RESULT_HOW_TITLE[key] || "How it works";
+    if (howTitle) howTitle.textContent = RESULT_HOW_TITLE[key] || "How It Works";
     const trace = res.trace;
     const canAnimate = trace && trace.length > 1;
     document.getElementById("res-desc").textContent = canAnimate
-        ? `${info.desc} The board below replays recorded steps (very long runs are sampled so the page stays responsive).`
+        ? `${info.desc} The board below replays recorded steps (long runs are sampled to keep playback responsive).`
         : info.desc;
     const metricNote = document.getElementById("res-metric-note");
     if (metricNote) {
