@@ -1,94 +1,56 @@
 # NineByNine AI
 
-### A Multi-Strategy Sudoku CSP Solver
+Sudoku as a CSP for CS 5100 (Foundations of AI), Northeastern.
 
-> CS 5100 — Foundations of Artificial Intelligence · Northeastern University
-
----
-
-## What Is This?
-
-NineByNine AI models Sudoku as a **Constraint Satisfaction Problem** and solves it using multiple AI strategies — from brute-force backtracking to intelligent heuristic-driven search. The goal is to compare how different CSP techniques perform and demonstrate the power of smart variable/value selection.
+We built several solvers and a small web UI so we could see how they behave side by side—runtime, backtracks, nodes, that kind of thing.
 
 ---
 
-## Team
+## Who did what
 
-| Member | Role |
-|--------|------|
-| **Salwa** | Board representation, constraint checking, puzzle generation, Plain Backtracking solver, MRV solver |
-| **Anjali** | Domain tracking, Forward Checking solver, metrics collection system |
-| **Ayush** | Min-Conflicts local search solver, strategy runner, integration |
+Salwa handled the board, constraints, generator, plain backtracking, and the MRV solver (with degree tie-breaks and LCV). Anjali did domains, forward checking with AC-3, and metrics. Ayush did min-conflicts, the runner that batches everything, and the frontend.
 
 ---
 
-## Algorithms
+## Solvers (quick version)
 
-**Plain Backtracking** — The baseline. Fills cells left-to-right, top-to-bottom, tries values 1–9, and backtracks on constraint violations. Simple but explores many unnecessary branches.
+**Plain backtracking** — Fixed cell order, try 1–9, backtrack when something breaks. Slow but easy to reason about.
 
-**Backtracking + MRV** — Smarter cell selection. Always picks the most constrained cell (fewest legal values remaining). Dramatically reduces the search space compared to plain backtracking.
+**MRV** — Pick the cell with the fewest legal moves; if there’s a tie, prefer the one tied to more empty neighbors (degree). Try values in LCV order when possible. Lives in `salwa/mrv_solver.py`; the browser version does the same thing.
 
-**MRV + Forward Checking** — Adds constraint propagation. After each assignment, prunes that value from all neighboring cells' domains. If any domain becomes empty, backtracks immediately without wasting time.
+**Forward checking + AC-3** — Keeps domains updated, prunes after each placement, runs AC-3 at the start and after moves (`anjali/forward_checking.py`). MRV here is just “smallest domain”; no degree tie-break. Values go in sorted order.
 
-**Min-Conflicts (Local Search)** — A completely different paradigm. Fills the board randomly and iteratively repairs conflicts by swapping values within 3×3 boxes. No search tree — purely iterative repair. *(Early stage)*
+**Min-conflicts** — Local search: shuffle and repair inside 3×3 boxes. It’s in the runner with sane iteration caps.
 
 ---
 
-## How to Run
+## Run it
 
-No external dependencies — pure Python 3.
+Python 3 only, no pip install.
 
 ```bash
 python demo.py
 ```
 
-This runs the available solvers on built-in easy and hard sample puzzles and prints a comparison of their performance.
+That hits a few sample boards plus a random one and prints timings for each solver.
+
+For the UI, open `frontend/index.html` in a browser (or serve `frontend/` if you prefer). You get the grid, solver buttons, and step traces there.
 
 ---
 
-## Project Structure
+## Repo layout
 
 ```
-├── common/                  # Shared foundation
-│   ├── board.py             # SudokuBoard — grid, clone, neighbors
-│   ├── constraints.py       # Validation and legal value computation
-│   └── generator.py         # Puzzle generation (4 difficulty levels)
-│
-├── salwa/                   # Salwa's work
-│   ├── backtracking.py      # Plain Backtracking solver
-│   └── mrv_solver.py        # Backtracking + MRV solver
-│
-├── anjali/                  # Anjali's work
-│   ├── domains.py           # Domain tracker for forward checking
-│   ├── forward_checking.py  # MRV + Forward Checking solver
-│   └── metrics.py           # Performance metrics collector
-│
-├── ayush/                   # Ayush's work
-│   ├── min_conflicts.py     # Min-Conflicts local search solver
-│   └── runner.py            # Strategy runner orchestration
-│
-├── demo.py                  # Run and compare solvers
-└── README.md
+common/          board, constraints, puzzle generator
+salwa/           backtracking, MRV
+anjali/          domains, forward checking + AC-3, metrics
+ayush/           min-conflicts, runner
+frontend/        static site — index, play page, app.js, styles
+demo.py          CLI comparison
 ```
 
 ---
 
-## Current Status
+## Notes
 
-- **Board, Constraints, Generator** — Complete. Supports 9×9 grids, four difficulty levels (Easy/Medium/Hard/Expert), neighbor lookups, and board cloning for solver isolation.
-- **Plain Backtracking** — Complete. Serves as the performance baseline.
-- **Backtracking + MRV** — Core MRV selection working. Degree heuristic tiebreaker and LCV ordering planned.
-- **MRV + Forward Checking** — Functional with domain pruning. AC-3 arc consistency planned.
-- **Metrics Collection** — Basic timing and metric recording. Chart visualization planned.
-- **Min-Conflicts** — Early-stage box-swap approach. Not yet integrated into the runner.
-
----
-
-## Next Steps
-
-- Optimize Min-Conflicts with sideways moves and stale detection (Ayush)
-- Add degree heuristic tiebreaker and LCV value ordering to MRV (Salwa)
-- Implement AC-3 arc consistency propagation (Anjali)
-- Build metrics chart visualization (Anjali)
-- Develop interactive web frontend with hints and AI solve modes (Ayush)
-- Full benchmark suite across all difficulty levels (All)
+Everything listed above is in place and wired through `demo.py` / `StrategyRunner`. If we extend it, min-conflicts is the main candidate for more tuning; we might also add a degree tie-break to forward-checking MRV to match the standalone MRV solver, or charts if we want prettier comparisons.
