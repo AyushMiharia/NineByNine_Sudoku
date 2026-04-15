@@ -684,7 +684,7 @@ const RESULT_HOW_TITLE = {
     backtracking: "How Backtracking Works",
     mrv: "How MRV Works",
     fc: "How Forward Checking Works",
-    mincon: "How Min-Conflicts Works",
+    mincon: "How Min Conflicts Works",
 };
 
 let puzzle = null;
@@ -701,6 +701,8 @@ let elapsed = 0;
 let aiOn = false;
 let done = false;
 let solveAnimRunId = 0;
+let lastReplayPayload = null;
+let activeReplayState = null;
 
 function show(id) {
     document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
@@ -928,18 +930,26 @@ function paintResultCells(cells, stateGrid, puzzleGrid) {
     }
 }
 
-function runTraceAnimation(trace, puzzleGrid, finalGrid, cells, runId, onPlaybackDone) {
+function runTraceAnimation(trace, puzzleGrid, finalGrid, cells, runId, onPlaybackDone, opts) {
     const wallStart = performance.now();
+    const speed = opts && opts.speedMultiplier ? opts.speedMultiplier : 1;
+    const replayState = { paused: false };
+    activeReplayState = replayState;
     if (!trace || trace.length < 2) {
         paintResultCells(cells, finalGrid, puzzleGrid);
         if (typeof onPlaybackDone === "function") onPlaybackDone(performance.now() - wallStart);
         return;
     }
     const budgetMs = 12000;
-    const delay = Math.min(72, Math.max(4, Math.floor(budgetMs / trace.length)));
+    const baseDelay = Math.min(72, Math.max(4, Math.floor(budgetMs / trace.length)));
+    const delay = Math.max(1, Math.floor(baseDelay / Math.max(0.1, speed)));
     let idx = 0;
     function tick() {
-        if (runId !== solveAnimRunId) return;
+        if (runId !== solveAnimRunId || activeReplayState !== replayState) return;
+        if (replayState.paused) {
+            setTimeout(tick, 80);
+            return;
+        }
         if (idx >= trace.length) {
             paintResultCells(cells, finalGrid, puzzleGrid);
             if (typeof onPlaybackDone === "function") onPlaybackDone(performance.now() - wallStart);
@@ -952,12 +962,57 @@ function runTraceAnimation(trace, puzzleGrid, finalGrid, cells, runId, onPlaybac
     tick();
 }
 
+function setPauseButtonState(show, paused) {
+    const pauseBtn = document.getElementById("res-pause-btn");
+    if (!pauseBtn) return;
+    pauseBtn.classList.toggle("hidden", !show);
+    pauseBtn.textContent = paused ? "Resume Replay" : "Pause Replay";
+}
+
+function playResultAnimation(payload, speedMultiplier) {
+    if (!payload) return;
+    solveAnimRunId++;
+    const runId = solveAnimRunId;
+    const rb = document.getElementById("res-board");
+    const cells = buildResultBoardCells(rb);
+    setPauseButtonState(payload.canAnimate, false);
+    const animVal = document.getElementById("met-anim-val");
+    if (animVal) animVal.textContent = payload.canAnimate ? "…" : formatSeconds(0);
+    runTraceAnimation(
+        payload.trace,
+        payload.puzzleGrid,
+        payload.finalGrid,
+        cells,
+        runId,
+        (playbackWallMs) => {
+            const el = document.getElementById("met-anim-val");
+            if (el) el.textContent = formatSeconds(playbackWallMs);
+            setPauseButtonState(payload.canAnimate, false);
+        },
+        { speedMultiplier: speedMultiplier || 1 }
+    );
+}
+
+function replayLastSolve() {
+    if (!lastReplayPayload || !lastReplayPayload.canAnimate) return;
+    playResultAnimation(lastReplayPayload, 1);
+}
+
+function replayLastSolveSlow() {
+    if (!lastReplayPayload || !lastReplayPayload.canAnimate) return;
+    playResultAnimation(lastReplayPayload, 0.5);
+}
+
+function toggleReplayPause() {
+    if (!activeReplayState || !lastReplayPayload || !lastReplayPayload.canAnimate) return;
+    activeReplayState.paused = !activeReplayState.paused;
+    setPauseButtonState(true, activeReplayState.paused);
+}
+
 function aiSolve(key) {
     const info = ALGOS[key];
     if (!info) return;
     clearInterval(timerInt);
-    solveAnimRunId++;
-    const runId = solveAnimRunId;
     const res = info.solver(puzzle, { recordTrace: true });
 
     document.getElementById("res-icon").textContent = info.icon;
@@ -1017,20 +1072,19 @@ function aiSolve(key) {
             "Runtime measures solver computation only; animation time reflects visualization playback.";
         runtimeNote.classList.toggle("hidden", !canAnimate);
     }
-    const statusNote = document.getElementById("res-status");
-    if (statusNote) {
-        statusNote.textContent = canAnimate
-            ? "Solver status: replaying recorded steps."
-            : "Solver status: displaying computed final state.";
-        statusNote.classList.remove("hidden");
-    }
-    const rb = document.getElementById("res-board");
-    const cells = buildResultBoardCells(rb);
+    const replayBtn = document.getElementById("res-replay-btn");
+    if (replayBtn) replayBtn.classList.toggle("hidden", !canAnimate);
+    const replaySlowBtn = document.getElementById("res-replay-slow-btn");
+    if (replaySlowBtn) replaySlowBtn.classList.toggle("hidden", !canAnimate);
+    setPauseButtonState(canAnimate, false);
+    lastReplayPayload = {
+        canAnimate,
+        trace: canAnimate ? trace : null,
+        puzzleGrid: gridClone(puzzle),
+        finalGrid: gridClone(res.grid),
+    };
     show("result-screen");
-    runTraceAnimation(canAnimate ? trace : null, puzzle, res.grid, cells, runId, (playbackWallMs) => {
-        const el = document.getElementById("met-anim-val");
-        if (el) el.textContent = formatSeconds(playbackWallMs);
-    });
+    playResultAnimation(lastReplayPayload, 1);
 }
 
 document.addEventListener("keydown", (e) => {
@@ -1068,6 +1122,9 @@ document.addEventListener("DOMContentLoaded", () => {
         else if (act === "erase") eraseCell();
         else if (act === "hint") doHint();
         else if (act === "toggle-ai") toggleAI();
+        else if (act === "replay") replayLastSolve();
+        else if (act === "replay-slow") replayLastSolveSlow();
+        else if (act === "pause-replay") toggleReplayPause();
         else if (act === "ai" && el.dataset.algo) aiSolve(el.dataset.algo);
     });
 

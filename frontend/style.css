@@ -606,6 +606,17 @@ body {
   margin-bottom: 8px;
 }
 
+.replay-btn {
+  margin-top: 10px;
+  width: fit-content;
+}
+
+.replay-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .met-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

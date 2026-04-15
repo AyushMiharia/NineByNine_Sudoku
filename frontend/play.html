@@ -63,12 +63,22 @@
                     <p id="res-metric-note" class="res-note"></p>
                     <div id="res-metrics" class="met-grid"></div>
                     <p id="res-runtime-note" class="res-note hidden"></p>
-                    <p id="res-status" class="res-note hidden"></p>
                 </div>
             </div>
             <div class="res-right">
                 <h3>Final Solution</h3>
                 <div id="res-board" class="board sm-board"></div>
+                <div class="replay-actions">
+                    <button type="button" id="res-replay-btn" class="btn-ghost replay-btn hidden" data-act="replay">
+                        Replay Animation
+                    </button>
+                    <button type="button" id="res-replay-slow-btn" class="btn-ghost replay-btn hidden" data-act="replay-slow">
+                        Replay at 0.5x
+                    </button>
+                    <button type="button" id="res-pause-btn" class="btn-ghost replay-btn hidden" data-act="pause-replay">
+                        Pause Replay
+                    </button>
+                </div>
             </div>
         </div>
     </div>
